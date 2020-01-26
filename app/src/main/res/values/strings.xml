@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">PayDate</string>
+    <string name="title_activity_my_purchases">MyPurchasesActivity</string>
+    <string name="title_activity_specific_purchase">Transaction Details</string>
+    <string name="title_activity_purchase_activity">Payment Execution</string>
+    <string name="title_activity_get_json">GetJsonActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+</resources>

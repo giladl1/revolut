@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "477253954018",
+    "firebase_url": "https://paydate-6ebc8.firebaseio.com",
+    "project_id": "paydate-6ebc8",
+    "storage_bucket": "paydate-6ebc8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:477253954018:android:15e9c953dea0aca1",
+        "android_client_info": {
+          "package_name": "Tings.com.tings"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "477253954018-nedc814jsj7b8uq4dhplra0ulc21vrn2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAogBarXdqtE35x4BPUJuAVAHhuYNv8fc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "477253954018-nedc814jsj7b8uq4dhplra0ulc21vrn2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
