@@ -14,7 +14,11 @@ import com.beust.klaxon.JsonReader
 import com.beust.klaxon.Klaxon
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.extension.responseJson
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import com.google.gson.annotations.SerializedName
 import kotlinx.android.synthetic.main.activity_get_json.*
+import org.json.JSONObject
 import java.io.StringReader
 
 
@@ -24,7 +28,8 @@ class GetJsonActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_get_json)
         setSupportActionBar(toolbar1)
-        URL ="http://api.androidhive.info/json/movies.json"
+        URL="http://revolut.duckdns.org/latest?base=EUR"
+//        URL ="http://api.androidhive.info/json/movies.json"
         getJsonFromUrl()
 
 
@@ -34,7 +39,8 @@ class GetJsonActivity : AppCompatActivity() {
 
             Fuel.post(URL, listOf()).responseJson { request, response, result ->
                 Log.d("plzzzzz", result.get().content)
-                onTaskCompleted(result.get().content)
+                toGson(result.get().content)
+//                onTaskCompleted(result.get().content)
             }
         } catch (e: Exception) {
 
@@ -42,8 +48,17 @@ class GetJsonActivity : AppCompatActivity() {
 
         }
     }
+    private fun toGson(json:String){
+        val gson:Gson= Gson()
+        val currencyResults: currency=gson.fromJson(json,currency::class.java)
+    }
     private fun onTaskCompleted(json: String) {
         println(json)
+
+//        val result = Klaxon()
+//                .parse<currency>(json);
+
+
 //        val result = Klaxon()
 //                .parse<Movies>("""
 //
@@ -56,19 +71,23 @@ class GetJsonActivity : AppCompatActivity() {
 //        """)
         //here we parse the json into movies and then into an array of movies
         val klaxon = Klaxon()
-        val moviesArray = arrayListOf<mov>()
+        val currencyArray = arrayListOf<currency>()
         JsonReader(StringReader(json)).use {//jsonArray
-            reader -> reader.beginArray {
+            reader -> reader.beginObject { // } beginArray {
+
+//            val name2=reader.nextName()
+//            Log.v("yes",name2)
+//            val name=reader.nextName()
             while (reader.hasNext()) {
-                val curMovie = klaxon.parse<mov>(reader)
-                moviesArray.add(curMovie!!)
+                val curCurrency = klaxon.parse<currency>(reader)
+                currencyArray.add(curCurrency!!)
             }
         }
         }
         Log.v("klaxon","passed")
-        if(moviesArray==null || moviesArray.size==0)
+        if(currencyArray==null || currencyArray.size==0)
             Log.v("moviesArr"," is null")
-        insertMoviesToRoom(moviesArray)
+//        insertMoviesToRoom(moviesArray)
 
 
 //        Log.v("now","the time")
@@ -125,19 +144,65 @@ data class mov(
         @ColumnInfo val releaseYear: Int,
         @ColumnInfo val genre: MutableList<String>
 )
-
-@Entity(tableName = "currency_table")
+data class currencyList(
+        val results: List<currency?>? =null
+)
+//@Entity(tableName = "currency_table")
 data class currency(
+
+         val base: String?=null,
+         val date: String?=null,
+         @SerializedName("rates")
+         val rates: Rates?=null  //MutableList<Rates>
+
+
+)
 //        @PrimaryKey @ColumnInfo(name="title") val title: String,
 //        @ColumnInfo val image: String,
 //        @ColumnInfo val rating: Double,
 //        @ColumnInfo val releaseYear: Int,
 //        @ColumnInfo val genre: MutableList<String>
 
-        @ColumnInfo val base: String,
-        @ColumnInfo val date: String,
-        @ColumnInfo val rates: MutableList<String>
 
+//data class Rates(
+//        @PrimaryKey @ColumnInfo(name="title") val country: String,
+//        @ColumnInfo val rate: String
+//)
+
+data class Rates (
+
+         val aUD : Double,
+         val bGN : Double,
+         val bRL : Double,
+         val cAD : Double,
+         val cHF : Double,
+         val cNY : Double,
+         val cZK : Double,
+         val dKK : Double,
+         val gBP : Double,
+         val hKD : Double,
+         val hRK : Double,
+         val hUF : Double,
+         val iDR : Int,
+         val iLS : Double,
+         val iNR : Double,
+         val iSK : Double,
+         val jPY : Double,
+         val kRW : Double,
+         val mXN : Double,
+         val mYR : Double,
+         val nOK : Double,
+         val nZD : Double,
+         val pHP : Double,
+         val pLN : Double,
+         val rON : Double,
+         val rUB : Double,
+         val sEK : Double,
+         val sGD : Double,
+         val tHB : Double,
+         val tRY : Double,
+         val uSD : Double,
+         val zAR : Double
 )
 
 
