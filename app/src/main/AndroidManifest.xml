@@ -16,11 +16,7 @@
             android:name=".json.GetJsonActivity"
             android:label="@string/title_activity_get_json"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <service
@@ -37,7 +33,11 @@
             android:name=".MyMoviesActivity"
             android:label="@string/title_activity_my_purchases"
             android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

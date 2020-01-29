@@ -1,24 +1,20 @@
 package layout
 
+//import Tings.com.tings.firebaseClasses.Payment
+
+import Tings.com.tings.R
+import Tings.com.tings.SpecificCurrency
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import Tings.com.tings.R
-import Tings.com.tings.SpecificMovieActivity
-import Tings.com.tings.json.mov
-//import Tings.com.tings.firebaseClasses.Payment
-import Tings.com.tings.room.Movie
-import android.widget.ImageView
-import com.bumptech.glide.Glide
-import kotlinx.android.synthetic.main.recyclerview_item_row2.view.*
 
 
-class RecyclerAdapter(private val myDataset: MutableList<mov> ) ://Array<String>//
+class RecyclerAdapter(private var myDataset: MutableList<SpecificCurrency>)://MutableList<mov> ) ://Array<String>//
         RecyclerView.Adapter<RecyclerAdapter.MyViewHolder>() {
 
     // Provide a reference to the views for each data item
@@ -46,16 +42,16 @@ class RecyclerAdapter(private val myDataset: MutableList<mov> ) ://Array<String>
 //            textView6 = v.findViewById(R.id.textView6)
             v.setOnClickListener {
                 Log.d("RecyclerAdapter", "Element $adapterPosition clicked.")
-                val intent = Intent(context, SpecificMovieActivity::class.java)
-                intent.putExtra("title",textViewTitle.text)
-                intent.putExtra("image",v.textViewImage.text)//the url link
-                intent.putExtra("rating",textViewRating.text)
-                intent.putExtra("releaseYear",textViewReleaseYear.text)
-                intent.putExtra("genres",textViewGenres.text)
+//                val intent = Intent(context, SpecificMovieActivity::class.java)
+//                intent.putExtra("title",textViewTitle.text)
+//                intent.putExtra("image",v.textViewImage.text)//the url link
+//                intent.putExtra("rating",textViewRating.text)
+//                intent.putExtra("releaseYear",textViewReleaseYear.text)
+//                intent.putExtra("genres",textViewGenres.text)
 
 //                intent.putExtra("image",textView4.text)
 
-                context.startActivity(intent)
+//                context.startActivity(intent)
 
             }
         }
@@ -76,17 +72,19 @@ class RecyclerAdapter(private val myDataset: MutableList<mov> ) ://Array<String>
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
+        holder.textViewTitle.text=myDataset[position].currencyName
+        holder.textViewRating.text=myDataset[position].currencyValue.toString()
+        holder.itemView.setOnClickListener(View.OnClickListener { updateList(position) })
+//        holder.textViewTitle.text = myDataset[position].title
+//        holder.textViewRating.text = myDataset[position].rating.toString()
+//        holder.textViewReleaseYear.text = myDataset[position].releaseYear.toString()
+//        holder.textViewGenres.text=getGenresInString( myDataset[position].genre)
+//        holder.textViewImage.text = myDataset[position].image
 
-        holder.textViewTitle.text = myDataset[position].title
-        holder.textViewRating.text = myDataset[position].rating.toString()
-        holder.textViewReleaseYear.text = myDataset[position].releaseYear.toString()
-        holder.textViewGenres.text=getGenresInString( myDataset[position].genre)
-        holder.textViewImage.text = myDataset[position].image
 
-
-        Glide.with(holder.context)
-                .load(myDataset[position].image)
-                .into(holder.imageView)
+//        Glide.with(holder.context)
+//                .load(myDataset[position].image)
+//                .into(holder.imageView)
     }
 
     private fun getGenresInString(genre: MutableList<String>): CharSequence? {
@@ -100,6 +98,20 @@ class RecyclerAdapter(private val myDataset: MutableList<mov> ) ://Array<String>
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = myDataset.size
 
+    fun updateList(itemIndex:Int) {
+//        myDataset = data
+//        notifyDataSetChanged()
+        val movingItem:SpecificCurrency=myDataset[itemIndex]
+        myDataset.removeAt(itemIndex);
+        myDataset.add(0, movingItem);
+        notifyItemMoved(itemIndex,0)
+//// notify adapter
+//        adapter.notifyItemMoved(fromPosition, toPosition);
+//
+//        myDataset.set(0,myDataset[itemIndex])
+//        notifyItemChanged(0)
+    }
 }
+
 
 
