@@ -1,8 +1,8 @@
 package Tings.com.tings
 
-class SpecificCurrency(currencyName: String, currencyValue: Double?) {
+class SpecificCurrency(currencyName: String,currencyBigName:String?, currencyValue: Double?,flagLink:String?) {
     val currencyName:String=currencyName
-    val currencyBigName:String?=null
-    val currencyValue:Double?=currencyValue
-    val flagLink:String?=null
+    val currencyBigName:String?=currencyBigName
+    var currencyValue:Double?=currencyValue
+    val flagLink:String?=flagLink
 }

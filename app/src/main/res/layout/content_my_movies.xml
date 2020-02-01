@@ -19,7 +19,7 @@
                 android:id="@+id/textView2"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:text="movie list:"
+                android:text="Currency List:"
                 android:textAlignment="center"
                 android:textColor="@color/design_default_color_primary"
                 android:textSize="18sp" />

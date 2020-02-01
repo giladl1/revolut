@@ -11,9 +11,11 @@ import androidx.recyclerview.widget.RecyclerView
 
 import layout.RecyclerAdapter
 import Tings.com.tings.room.*
+import android.content.SharedPreferences
 import android.provider.Telephony
 import android.util.Log
 import androidx.room.Room
+import com.beust.klaxon.World
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.google.gson.Gson
@@ -22,6 +24,7 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.android.synthetic.main.activity_get_json.*
 import kotlinx.coroutines.*
 import java.util.*
+import kotlin.concurrent.schedule
 
 
 class MyMoviesActivity : AppCompatActivity() {
@@ -31,13 +34,26 @@ class MyMoviesActivity : AppCompatActivity() {
     private lateinit var viewManager: RecyclerView.LayoutManager
     lateinit var URL:String
     private lateinit var ratesList: MutableList<SpecificCurrency>
+    private lateinit var currencyDetailsMap:MutableMap<String,CurrencyDetails>
+    private lateinit var formerJson:String // saves the last retrieved json
+    //sharedpref definitions:
+    private var PRIVATE_MODE = 0
+    private val PREF_NAME = "edittext_focus_mode"
+    private lateinit var sharedPref: SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPref = getSharedPreferences(PREF_NAME, PRIVATE_MODE)
+        val editor = sharedPref.edit()
+        editor.putBoolean(PREF_NAME, false)
+        editor.apply()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_movies)
         setSupportActionBar(toolbar1)
+        formerJson=" "
+        currencyDetailsMap = mutableMapOf<String, CurrencyDetails>()
         URL="http://revolut.duckdns.org/latest?base=EUR"
+        getDetailsJsonFromUrl()
+
         getJsonFromUrl()
-//        URL ="http://api.androidhive.info/json/movies.json"
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
@@ -74,11 +90,30 @@ class MyMoviesActivity : AppCompatActivity() {
 
     private fun getJsonFromUrl() {
         try {
+            Timer("jsonReading", false).schedule(0,101000) {
+                Fuel.post(URL, listOf()).responseJson { request, response, result ->
+                    val currentJson:String=result.get().content
+                    val isEditTextInFocus=sharedPref.getBoolean(PREF_NAME,false)
+                    if((!currentJson.equals(formerJson)) && !isEditTextInFocus) {
+                        formerJson = currentJson
+                        toGson(currentJson)
+                    }
+                    else{}
+                }
+            }//end Timer
+            } catch (e: Exception) {
 
-            Fuel.post(URL, listOf()).responseJson { request, response, result ->
-                Log.d("plzzzzz", result.get().content)
-                toGson(result.get().content)
-//                onTaskCompleted(result.get().content)
+            } finally {
+
+            }
+
+    }
+    private fun getDetailsJsonFromUrl() {
+        try {
+
+            val DETAILSURL:String="https://restcountries.eu/rest/v2/all?fields=flag;currencies;alpha2Code"//http://www.geognos.com/api/en/countries/info/all.json"//http://restcountries.eu/rest/v2/alpha/col"//https://restcountries.eu/rest/v2/all"//?fields=flag;currencies
+            Fuel.get(DETAILSURL, listOf()).responseJson { request, response, result ->
+                toGsonDetails(result.get().content)
             }
         } catch (e: Exception) {
 
@@ -86,132 +121,148 @@ class MyMoviesActivity : AppCompatActivity() {
 
         }
     }
+    private fun toGsonDetails(json:String) {
+        val gson: Gson = Gson()
+        val currencyDetailsResults = gson.fromJson(json, Array<CurrencyDetails>::class.java).toList()
+        //todo put all inside a map
+        currencyDetailsResults.forEachIndexed { index, it ->
+
+            val code = currencyDetailsResults.get(index).currencies[0].code
+//            val name = currencyDetailsResults.get(index).currencies[0].name
+//            val flag = currencyDetailsResults.get(index).flag
+//            currencyDetailsMap = mutableMapOf<String, CurrencyDetails>()
+            currencyDetailsMap.put(code, currencyDetailsResults[index])
+        }
+        //todo this line need to be in the creation of rateslist
+//        currencyDetailsMap.get("ils")?.flag
+//        val symbol=currencyDetailsResults.get(0).currencies[0].symbol
+    }
     private fun toGson(json:String){
         val gson: Gson = Gson()
         val currencyResults: Currency =gson.fromJson(json, Currency::class.java)
 //        val curcur: Rates=gson.fromJson(json.begin)
         //
         ratesList= arrayListOf()
-        var bundle:Bundle
         var currencyName:String
         var currencyValue:Double?
-
-        currencyName="aud"
+        currencyName="EUR"
+        currencyValue= 1.0
+        createRatesList(currencyName,currencyValue)
+        currencyName="AUD"
         currencyValue= currencyResults.rates?.AUD
         createRatesList(currencyName,currencyValue)
-        currencyName="bgn"
+        currencyName="BGN"
         currencyValue= currencyResults.rates?.BGN
         createRatesList(currencyName,currencyValue)
-        currencyName="brl"
-        currencyValue= currencyResults.rates?.BGN
+        currencyName="BRL"
+        currencyValue= currencyResults.rates?.BRL
         createRatesList(currencyName,currencyValue)
-        currencyName="cad"
-        currencyValue= currencyResults.rates?.BGN
+        currencyName="CAD"
+        currencyValue= currencyResults.rates?.CAD
         createRatesList(currencyName,currencyValue)
-        currencyName="chf"
-        currencyValue= currencyResults.rates?.BGN
+        currencyName="CHF"
+        currencyValue= currencyResults.rates?.CHF
         createRatesList(currencyName,currencyValue)
         currencyName="CNY"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.CNY
         createRatesList(currencyName,currencyValue)
         currencyName="CZK"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.CZK
         createRatesList(currencyName,currencyValue)
         currencyName="DKK"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.DKK
         createRatesList(currencyName,currencyValue)
         currencyName="GBP"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.GBP
         createRatesList(currencyName,currencyValue)
         currencyName="HKD"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.HKD
         createRatesList(currencyName,currencyValue)
         currencyName="HRK"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.HRK
         createRatesList(currencyName,currencyValue)
         currencyName="HUF"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.HUF
         createRatesList(currencyName,currencyValue)
         currencyName="IDR"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.IDR
         createRatesList(currencyName,currencyValue)
         currencyName="ILS"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.ILS
         createRatesList(currencyName,currencyValue)
         currencyName="INR"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.INR
         createRatesList(currencyName,currencyValue)
         currencyName="ISK"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.ISK
         createRatesList(currencyName,currencyValue)
         currencyName="JPY"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.JPY
         createRatesList(currencyName,currencyValue)
         currencyName="KRW"
-        currencyValue= currencyResults.rates?.BGN
-        createRatesList(currencyName,currencyValue)
-        currencyName="MSN"
-        currencyValue= currencyResults.rates?.BGN
-        createRatesList(currencyName,currencyValue)
-        currencyName="KRW"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.KRW
         createRatesList(currencyName,currencyValue)
         currencyName="MXN"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.MXN
         createRatesList(currencyName,currencyValue)
         currencyName="MYR"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.MYR
         createRatesList(currencyName,currencyValue)
         currencyName="NOK"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.NOK
         createRatesList(currencyName,currencyValue)
         currencyName="NZD"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.NZD
         createRatesList(currencyName,currencyValue)
         currencyName="PHP"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.PHP
         createRatesList(currencyName,currencyValue)
         currencyName="RON"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.RON
         createRatesList(currencyName,currencyValue)
         currencyName="RUB"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.RUB
         createRatesList(currencyName,currencyValue)
         currencyName="SEK"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.SEK
         createRatesList(currencyName,currencyValue)
         currencyName="SGD"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.SGD
         createRatesList(currencyName,currencyValue)
         currencyName="THB"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.THB
         createRatesList(currencyName,currencyValue)
         currencyName="TRY"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.TRY
         createRatesList(currencyName,currencyValue)
         currencyName="USD"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.USD
         createRatesList(currencyName,currencyValue)
         currencyName="ZAR"
-        currencyValue= currencyResults.rates?.BGN
+        currencyValue= currencyResults.rates?.ZAR
         createRatesList(currencyName,currencyValue)
         //
         operateAdapter(ratesList )
     }
     private fun createRatesList(currencyName:String,currencyValue:Double?){
-        val specificCurrency:SpecificCurrency=SpecificCurrency(currencyName,currencyValue)
 
+        val currencyBigName:String?= currencyDetailsMap.get(currencyName)?.currencies?.get(0)?.name//the full name of currency
+        val alpha2Code:String? =currencyDetailsMap.get(currencyName)?.alpha2Code//link to currency home country
+        val flagLink:String?="https://www.countryflags.io/"+alpha2Code+"/flat/64.png"//country code so we can get flag in adapter
+        //create specific currency with all its params:
+        val specificCurrency:SpecificCurrency=SpecificCurrency(currencyName,currencyBigName ,currencyValue,flagLink)
+        //create the rateList with the details of the currency
         ratesList.add(specificCurrency)
     }
-    private fun getGenresStrings(myGenres:MutableList<Genre>): MutableList<String> {
-        var currentGenresStrings: MutableList<String> = arrayListOf()
-        myGenres?.forEachIndexed { index, genre ->
-
-                currentGenresStrings.add(index, myGenres[index].genre)
-
-        }
-        return currentGenresStrings
-    }
+//    private fun getGenresStrings(myGenres:MutableList<Genre>): MutableList<String> {
+//        var currentGenresStrings: MutableList<String> = arrayListOf()
+//        myGenres?.forEachIndexed { index, genre ->
+//
+//                currentGenresStrings.add(index, myGenres[index].genre)
+//
+//        }
+//        return currentGenresStrings
+//    }
 
     fun askPermission(){
         // Here, thisActivity is the current activity
@@ -246,7 +297,7 @@ class MyMoviesActivity : AppCompatActivity() {
     fun operateAdapter(currency: MutableList<SpecificCurrency>){//movies:MutableList<mov>){
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = RecyclerAdapter(currency)//movies)//, paymentIds )//dataset
+        viewAdapter = RecyclerAdapter(currency,this)//movies)//, paymentIds )//dataset
 
         recyclerView = findViewById<RecyclerView>(R.id.recyclerView).apply {
             // use this setting to improve performance if you know that changes
@@ -286,7 +337,7 @@ data class Rates (
         val HKD : Double,
         val HRK : Double,
         val HUF : Double,
-        val IDR : Int,
+        val IDR : Double,
         val ILS : Double,
         val INR : Double,
         val ISK : Double,
@@ -307,5 +358,20 @@ data class Rates (
         val USD : Double,
         val ZAR : Double
 )
+
+//for the details json:
+data class CurrencyDetails (
+
+        @SerializedName("currencies") val currencies : List<Currencies>,
+        @SerializedName("flag") val flag : String,
+        @SerializedName("alpha2Code") val alpha2Code : String
+)
+data class Currencies (
+
+        @SerializedName("code") val code : String,
+        @SerializedName("name") val name : String,
+        @SerializedName("symbol") val symbol : String
+)
+
 
 
