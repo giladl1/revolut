@@ -26,6 +26,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.*
 import kotlin.concurrent.schedule
+import kotlin.concurrent.timerTask
 
 
 class MyMoviesActivity : AppCompatActivity() {
@@ -41,6 +42,7 @@ class MyMoviesActivity : AppCompatActivity() {
     private var PRIVATE_MODE = 0
     private val PREF_NAME = "lastScrollTime"
     private lateinit var sharedPref: SharedPreferences
+    private lateinit var timer:Timer// to operate the data update every 1 second
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_movies)
@@ -51,13 +53,18 @@ class MyMoviesActivity : AppCompatActivity() {
         getInternetPermission()
         URL = "http://revolut.duckdns.org/latest?base=EUR"
         getDetailsJsonFromUrl()//get data of countries
-        getJsonFromUrl()//get revolut data
+
 
     }
 
     override fun onStart() {
         super.onStart()
+        getJsonFromUrl()//get revolut data
+    }
 
+    override fun onStop() {
+        super.onStop()
+        timer.cancel()
     }
 
     //*********************************************************************
@@ -100,8 +107,9 @@ class MyMoviesActivity : AppCompatActivity() {
     //*********************************************************************
     private fun getJsonFromUrl() {
         try {
+            timer=Timer("jsonReading", false)
             //get the data every one second unless user touched the recyclerview:
-            Timer("jsonReading", false).schedule(0,1000) {
+            val timerTask:TimerTask=timer.schedule(0,1000) {
                 Fuel.post(URL, listOf()).responseJson { request, response, result ->
                     val currentJson:String=result.get().content
                     val lastScrollTime=sharedPref.getLong(PREF_NAME,0)
@@ -114,6 +122,7 @@ class MyMoviesActivity : AppCompatActivity() {
                     }
                 }
             }//end Timer
+
             } catch (e: Exception) {
 
             } finally {
