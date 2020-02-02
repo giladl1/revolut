@@ -1,14 +1,10 @@
-package Tings.com.tings.room
+package Tings.com.revolut.room
 
-import Tings.com.tings.json.mov
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import androidx.room.Room
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.*

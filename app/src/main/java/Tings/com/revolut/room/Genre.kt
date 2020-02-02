@@ -1,8 +1,7 @@
-package Tings.com.tings.room
+package Tings.com.revolut.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
 @Entity(tableName = "genre_table",primaryKeys = arrayOf("title", "num"))
 class Genre(

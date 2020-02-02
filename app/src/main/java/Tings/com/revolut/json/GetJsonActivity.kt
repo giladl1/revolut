@@ -1,7 +1,7 @@
-package Tings.com.tings.json
-import Tings.com.tings.MyMoviesActivity
-import Tings.com.tings.R
-import Tings.com.tings.room.MovieRoomDatabase
+package Tings.com.revolut.json
+import Tings.com.revolut.MyCurrenciesActivity
+import Tings.com.revolut.R
+import Tings.com.revolut.room.MovieRoomDatabase
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -15,10 +15,8 @@ import com.beust.klaxon.Klaxon
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.google.gson.Gson
-import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.synthetic.main.activity_get_json.*
-import org.json.JSONObject
 import java.io.StringReader
 
 
@@ -113,12 +111,12 @@ class GetJsonActivity : AppCompatActivity() {
             jsonMovies?.forEach {
                 Log.v("before println it","passed")
 //                println(it)
-                var myMovie= Tings.com.tings.room.Movie(it.title,it.image,it.rating,it.releaseYear)//Movies()
+                var myMovie= Tings.com.revolut.room.Movie(it.title,it.image,it.rating,it.releaseYear)//Movies()
                 Log.v("before it title","passed")
 
                 var myGenres=it.genre
                 myGenres?.forEachIndexed{index,it_g->
-                    var singleGenre=Tings.com.tings.room.Genre(myMovie.title,index,it_g)
+                    var singleGenre=Tings.com.revolut.room.Genre(myMovie.title,index,it_g)
                     movieDatabase.genreDao().insertSingleGenre(singleGenre)
                 }
 
@@ -128,7 +126,7 @@ class GetJsonActivity : AppCompatActivity() {
 //                insertGenresToRoom(title,List<Genres>)
                 }
 //        }
-        val intent = Intent(this, MyMoviesActivity::class.java)
+        val intent = Intent(this, MyCurrenciesActivity::class.java)
         startActivity(intent)
     }
 

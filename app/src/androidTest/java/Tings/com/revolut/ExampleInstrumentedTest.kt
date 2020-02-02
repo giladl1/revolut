@@ -1,4 +1,4 @@
-package Tings.com.tings
+package Tings.com.revolut
 
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4

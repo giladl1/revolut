@@ -1,7 +1,5 @@
-package Tings.com.tings
+package Tings.com.revolut
 
-import Tings.com.tings.room.Movie
-import Tings.com.tings.room.MovieRoomDatabase
 import android.Manifest
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -12,7 +10,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.google.gson.Gson
@@ -20,16 +17,11 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.android.synthetic.main.activity_get_json.*
 import kotlinx.android.synthetic.main.content_my_movies.*
 import layout.RecyclerAdapter
-import java.sql.Timestamp
-import java.text.SimpleDateFormat
-import java.time.Duration
-import java.time.Instant
 import java.util.*
 import kotlin.concurrent.schedule
-import kotlin.concurrent.timerTask
 
 
-class MyMoviesActivity : AppCompatActivity() {
+class MyCurrenciesActivity : AppCompatActivity() {
     val MY_PERMISSIONS_REQUEST_INTERNET = 1
     //    private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>

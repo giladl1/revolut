@@ -1,7 +1,5 @@
-package Tings.com.tings.room
+package Tings.com.revolut.room
 
-import Tings.com.tings.json.mov
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="Tings.com.tings">
+    package="Tings.com.revolut">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -13,24 +13,24 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".json.GetJsonActivity"
+            android:name="Tings.com.revolut.json.GetJsonActivity"
             android:label="@string/title_activity_get_json"
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>
 
         <service
-            android:name=".room.GetMoviesService"
+            android:name="Tings.com.revolut.room.GetMoviesService"
             android:enabled="true"
             android:exported="true" />
         <activity
-            android:name=".SpecificMovieActivity"
+            android:name="Tings.com.revolut.SpecificMovieActivity"
             android:label="@string/title_activity_specific_purchase"
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>
         <activity
-            android:name=".MyMoviesActivity"
+            android:name="Tings.com.revolut.MyCurrenciesActivity"
             android:label="@string/title_activity_my_purchases"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

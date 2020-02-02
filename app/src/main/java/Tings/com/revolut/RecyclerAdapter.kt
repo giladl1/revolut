@@ -1,8 +1,8 @@
 package layout
 
 
-import Tings.com.tings.R
-import Tings.com.tings.SpecificCurrency
+import Tings.com.revolut.R
+import Tings.com.revolut.SpecificCurrency
 import android.content.Context
 import android.content.SharedPreferences
 import android.view.KeyEvent

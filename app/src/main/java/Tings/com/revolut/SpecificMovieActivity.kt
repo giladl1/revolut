@@ -1,4 +1,4 @@
-package Tings.com.tings
+package Tings.com.revolut
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity;

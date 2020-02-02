@@ -1,4 +1,4 @@
-package Tings.com.tings
+package Tings.com.revolut
 
 class SpecificCurrency(currencyName: String,currencyBigName:String?, currencyValue: Double?,flagLink:String?) {
     val currencyName:String=currencyName

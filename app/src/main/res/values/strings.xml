@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PayDate</string>
+    <string name="app_name">Revolut</string>
     <string name="title_activity_my_purchases">MyPurchasesActivity</string>
     <string name="title_activity_specific_purchase">Transaction Details</string>
     <string name="title_activity_purchase_activity">Payment Execution</string>

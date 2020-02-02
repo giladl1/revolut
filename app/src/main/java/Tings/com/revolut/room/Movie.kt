@@ -1,4 +1,4 @@
-package Tings.com.tings.room
+package Tings.com.revolut.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
