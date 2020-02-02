@@ -14,16 +14,13 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-import kotlinx.android.synthetic.main.activity_get_json.*
-import kotlinx.android.synthetic.main.content_my_movies.*
+import kotlinx.android.synthetic.main.content_my_currencies.*
 import layout.RecyclerAdapter
 import java.util.*
 import kotlin.concurrent.schedule
 
-
 class MyCurrenciesActivity : AppCompatActivity() {
     val MY_PERMISSIONS_REQUEST_INTERNET = 1
-    //    private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var URL: String
@@ -37,16 +34,13 @@ class MyCurrenciesActivity : AppCompatActivity() {
     private lateinit var timer:Timer// to operate the data update every 1 second
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_my_movies)
-        setSupportActionBar(toolbar1)
+        setContentView(R.layout.activity_my_currencies)
         initializeScrollListener()
         initializeSharedPreferences()
         currencyDetailsMap = mutableMapOf<String, CurrencyDetails>()
         getInternetPermission()
         URL = "http://revolut.duckdns.org/latest?base=EUR"
         getDetailsJsonFromUrl()//get data of countries
-
-
     }
 
     override fun onStart() {

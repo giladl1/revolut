@@ -20,7 +20,7 @@
         </activity>
 
         <service
-            android:name="Tings.com.revolut.room.GetMoviesService"
+            android:name="Tings.com.revolut.all.GetMoviesService"
             android:enabled="true"
             android:exported="true" />
         <activity
