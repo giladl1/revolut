@@ -29,72 +29,89 @@ import kotlin.concurrent.schedule
 
 
 class MyMoviesActivity : AppCompatActivity() {
-    val MY_PERMISSIONS_REQUEST_INTERNET=1
-//    private lateinit var recyclerView: RecyclerView
+    val MY_PERMISSIONS_REQUEST_INTERNET = 1
+    //    private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
-    private lateinit var URL:String
+    private lateinit var URL: String
     private lateinit var ratesList: MutableList<SpecificCurrency>
-    private lateinit var currencyDetailsMap:MutableMap<String,CurrencyDetails>
-    private lateinit var formerJson:String // saves the last retrieved json
+    private lateinit var currencyDetailsMap: MutableMap<String, CurrencyDetails>
+    private lateinit var formerJson: String // saves the last retrieved json
     //sharedpref definitions:
     private var PRIVATE_MODE = 0
     private val PREF_NAME = "lastScrollTime"
     private lateinit var sharedPref: SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_my_movies)
+        setSupportActionBar(toolbar1)
+        initializeScrollListener()
+        initializeSharedPreferences()
+        currencyDetailsMap = mutableMapOf<String, CurrencyDetails>()
+        getInternetPermission()
+        URL = "http://revolut.duckdns.org/latest?base=EUR"
+        getDetailsJsonFromUrl()//get data of countries
+        getJsonFromUrl()//get revolut data
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+    }
+
+    //*********************************************************************
+    //****will help us know when we shouldn't update the recyclerview data
+    //*********************************************************************
+    private fun initializeScrollListener() {
+        recyclerView.setOnScrollChangeListener(object : View.OnScrollChangeListener {
+            override fun onScrollChange(v: View?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
+                val lastScrollTime = System.currentTimeMillis()
+                val editor = sharedPref.edit()
+                editor.putLong(PREF_NAME, lastScrollTime) //putBoolean(PREF_NAME, true)
+                editor.apply()
+                //To change body of created functions use File | Settings | File Templates.
+            }
+        })
+        formerJson = " "
+    }
+    //*********************************************************************
+    //****will help us know when user scrolled the recyclerview
+    //*********************************************************************
+    private fun initializeSharedPreferences() {
         sharedPref = getSharedPreferences(PREF_NAME, PRIVATE_MODE)
         val editor = sharedPref.edit()
         editor.putLong(PREF_NAME, 0)
         editor.apply()
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_my_movies)
-        recyclerView.setOnScrollChangeListener(object:View.OnScrollChangeListener{
-            override fun onScrollChange(v: View?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
-                val lastScrollTime= System.currentTimeMillis()
-                val editor = sharedPref.edit()
-                editor.putLong(PREF_NAME,lastScrollTime) //putBoolean(PREF_NAME, true)
-                editor.apply()
-                 //To change body of created functions use File | Settings | File Templates.
-            }
-        })
-        setSupportActionBar(toolbar1)
-        formerJson=" "
-        currencyDetailsMap = mutableMapOf<String, CurrencyDetails>()
-        URL="http://revolut.duckdns.org/latest?base=EUR"
-        getDetailsJsonFromUrl()
-
-        getJsonFromUrl()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted
-            askPermission()
-        }
-        else askPermission()
-
-        var movieDatabase:MovieRoomDatabase=
-                Room.databaseBuilder(this,
-                        MovieRoomDatabase::class.java, "movies")
-                        .fallbackToDestructiveMigration().allowMainThreadQueries()
-                        .build()
-        var data= mutableListOf<Movie>()
-
-        }
-
+    }
+    //*********************************************************************
+    //****we must get user permission to access internet
+    //*********************************************************************
+    private fun getInternetPermission(){
+    if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
+        != PackageManager.PERMISSION_GRANTED) {
+        // Permission is not granted
+        askPermission()
+    }
+    else askPermission()
+    }
+    //*********************************************************************
+    //****get data from revolut server
+    //*********************************************************************
     private fun getJsonFromUrl() {
         try {
+            //get the data every one second unless user touched the recyclerview:
             Timer("jsonReading", false).schedule(0,1000) {
                 Fuel.post(URL, listOf()).responseJson { request, response, result ->
                     val currentJson:String=result.get().content
-
                     val lastScrollTime=sharedPref.getLong(PREF_NAME,0)
                     val now= System.currentTimeMillis()
                     val secondsSinceLastScroll: Long =(now-lastScrollTime)/1000
-
+                    //no need to update data if user is touching the recyclerview or if data is updated:
                     if((!currentJson.equals(formerJson)) && secondsSinceLastScroll>6) {
                         formerJson = currentJson
                         toGson(currentJson)
                     }
-                    else{}
                 }
             }//end Timer
             } catch (e: Exception) {
@@ -104,6 +121,9 @@ class MyMoviesActivity : AppCompatActivity() {
             }
 
     }
+    //*********************************************************************
+    //****get countries data from server
+    //*********************************************************************
     private fun getDetailsJsonFromUrl() {
         try {
 
@@ -117,27 +137,23 @@ class MyMoviesActivity : AppCompatActivity() {
 
         }
     }
+    //*********************************************************************
+    //****get countries data into json
+    //*********************************************************************
     private fun toGsonDetails(json:String) {
         val gson: Gson = Gson()
         val currencyDetailsResults = gson.fromJson(json, Array<CurrencyDetails>::class.java).toList()
-        //todo put all inside a map
         currencyDetailsResults.forEachIndexed { index, it ->
-
-            val code = currencyDetailsResults.get(index).currencies[0].code
-//            val name = currencyDetailsResults.get(index).currencies[0].name
-//            val flag = currencyDetailsResults.get(index).flag
-//            currencyDetailsMap = mutableMapOf<String, CurrencyDetails>()
-            currencyDetailsMap.put(code, currencyDetailsResults[index])
+        val code = currencyDetailsResults.get(index).currencies[0].code
+        currencyDetailsMap.put(code, currencyDetailsResults[index])
         }
-        //todo this line need to be in the creation of rateslist
-//        currencyDetailsMap.get("ils")?.flag
-//        val symbol=currencyDetailsResults.get(0).currencies[0].symbol
     }
+    //****************************************************************************************
+    //****get revolut data into json,and create list of currency values for the recyclerview:
+    //****************************************************************************************
     private fun toGson(json:String){
         val gson: Gson = Gson()
         val currencyResults: Currency =gson.fromJson(json, Currency::class.java)
-//        val curcur: Rates=gson.fromJson(json.begin)
-        //
         ratesList= arrayListOf()
         var currencyName:String
         var currencyValue:Double?
@@ -240,6 +256,9 @@ class MyMoviesActivity : AppCompatActivity() {
         //
         operateAdapter(ratesList )
     }
+    //*********************************************************************
+    //****create rates list to update in recyclerview
+    //*********************************************************************
     private fun createRatesList(currencyName:String,currencyValue:Double?){
 
         val currencyBigName:String?= currencyDetailsMap.get(currencyName)?.currencies?.get(0)?.name//the full name of currency
@@ -250,16 +269,9 @@ class MyMoviesActivity : AppCompatActivity() {
         //create the rateList with the details of the currency
         ratesList.add(specificCurrency)
     }
-//    private fun getGenresStrings(myGenres:MutableList<Genre>): MutableList<String> {
-//        var currentGenresStrings: MutableList<String> = arrayListOf()
-//        myGenres?.forEachIndexed { index, genre ->
-//
-//                currentGenresStrings.add(index, myGenres[index].genre)
-//
-//        }
-//        return currentGenresStrings
-//    }
-
+    //*********************************************************************
+    //****permission from user to enable internet in the app
+    //*********************************************************************
     fun askPermission(){
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,
@@ -309,70 +321,68 @@ class MyMoviesActivity : AppCompatActivity() {
         }
     }
 }
+    //*********************************************************************
+    //****data classes for revolut server
+    //*********************************************************************
+    data class Currency(
 
-private fun RecyclerView.OnScrollListener.onScrollStateChanged(recyclerView: RecyclerView, newState: Int, function: () -> Unit) {
+            val base: String?=null,
+            val date: String?=null,
+            @SerializedName("rates")
+            val rates: Rates?=null  //MutableList<Rates>
+    )
 
-}
+    data class Rates (
 
-data class Currency(
+            val AUD : Double,
+            val BGN : Double,
+            val BRL : Double,
+            val CAD : Double,
+            val CHF : Double,
+            val CNY : Double,
+            val CZK : Double,
+            val DKK : Double,
+            val GBP : Double,
+            val HKD : Double,
+            val HRK : Double,
+            val HUF : Double,
+            val IDR : Double,
+            val ILS : Double,
+            val INR : Double,
+            val ISK : Double,
+            val JPY : Double,
+            val KRW : Double,
+            val MXN : Double,
+            val MYR : Double,
+            val NOK : Double,
+            val NZD : Double,
+            val PHP : Double,
+            val PLN : Double,
+            val RON : Double,
+            val RUB : Double,
+            val SEK : Double,
+            val SGD : Double,
+            val THB : Double,
+            val TRY : Double,
+            val USD : Double,
+            val ZAR : Double
+    )
+    //*********************************************************************
+    //****data classes for the country details server
+    //*********************************************************************
+    //for the details json:
+    data class CurrencyDetails (
 
-        val base: String?=null,
-        val date: String?=null,
-        @SerializedName("rates")
-        val rates: Rates?=null  //MutableList<Rates>
+            @SerializedName("currencies") val currencies : List<Currencies>,
+            @SerializedName("flag") val flag : String,
+            @SerializedName("alpha2Code") val alpha2Code : String
+    )
+    data class Currencies (
 
-
-)
-
-data class Rates (
-
-        val AUD : Double,
-        val BGN : Double,
-        val BRL : Double,
-        val CAD : Double,
-        val CHF : Double,
-        val CNY : Double,
-        val CZK : Double,
-        val DKK : Double,
-        val GBP : Double,
-        val HKD : Double,
-        val HRK : Double,
-        val HUF : Double,
-        val IDR : Double,
-        val ILS : Double,
-        val INR : Double,
-        val ISK : Double,
-        val JPY : Double,
-        val KRW : Double,
-        val MXN : Double,
-        val MYR : Double,
-        val NOK : Double,
-        val NZD : Double,
-        val PHP : Double,
-        val PLN : Double,
-        val RON : Double,
-        val RUB : Double,
-        val SEK : Double,
-        val SGD : Double,
-        val THB : Double,
-        val TRY : Double,
-        val USD : Double,
-        val ZAR : Double
-)
-
-//for the details json:
-data class CurrencyDetails (
-
-        @SerializedName("currencies") val currencies : List<Currencies>,
-        @SerializedName("flag") val flag : String,
-        @SerializedName("alpha2Code") val alpha2Code : String
-)
-data class Currencies (
-
-        @SerializedName("code") val code : String,
-        @SerializedName("name") val name : String,
-        @SerializedName("symbol") val symbol : String
-)
+            @SerializedName("code") val code : String,
+            @SerializedName("name") val name : String,
+            @SerializedName("symbol") val symbol : String
+    )
 
 
 
