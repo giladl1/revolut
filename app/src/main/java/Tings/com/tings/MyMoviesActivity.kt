@@ -1,52 +1,62 @@
 package Tings.com.tings
 
+import Tings.com.tings.room.Movie
+import Tings.com.tings.room.MovieRoomDatabase
 import android.Manifest
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity;
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
-import layout.RecyclerAdapter
-import Tings.com.tings.room.*
-import android.content.SharedPreferences
-import android.provider.Telephony
-import android.util.Log
 import androidx.room.Room
-import com.beust.klaxon.World
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-
 import kotlinx.android.synthetic.main.activity_get_json.*
-import kotlinx.coroutines.*
+import kotlinx.android.synthetic.main.content_my_movies.*
+import layout.RecyclerAdapter
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.time.Duration
+import java.time.Instant
 import java.util.*
 import kotlin.concurrent.schedule
 
 
 class MyMoviesActivity : AppCompatActivity() {
     val MY_PERMISSIONS_REQUEST_INTERNET=1
-    private lateinit var recyclerView: RecyclerView
+//    private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
-    lateinit var URL:String
+    private lateinit var URL:String
     private lateinit var ratesList: MutableList<SpecificCurrency>
     private lateinit var currencyDetailsMap:MutableMap<String,CurrencyDetails>
     private lateinit var formerJson:String // saves the last retrieved json
     //sharedpref definitions:
     private var PRIVATE_MODE = 0
-    private val PREF_NAME = "edittext_focus_mode"
+    private val PREF_NAME = "lastScrollTime"
     private lateinit var sharedPref: SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = getSharedPreferences(PREF_NAME, PRIVATE_MODE)
         val editor = sharedPref.edit()
-        editor.putBoolean(PREF_NAME, false)
+        editor.putLong(PREF_NAME, 0)
         editor.apply()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_movies)
+        recyclerView.setOnScrollChangeListener(object:View.OnScrollChangeListener{
+            override fun onScrollChange(v: View?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
+                val lastScrollTime= System.currentTimeMillis()
+                val editor = sharedPref.edit()
+                editor.putLong(PREF_NAME,lastScrollTime) //putBoolean(PREF_NAME, true)
+                editor.apply()
+                 //To change body of created functions use File | Settings | File Templates.
+            }
+        })
         setSupportActionBar(toolbar1)
         formerJson=" "
         currencyDetailsMap = mutableMapOf<String, CurrencyDetails>()
@@ -59,7 +69,7 @@ class MyMoviesActivity : AppCompatActivity() {
             // Permission is not granted
             askPermission()
         }
-        else askPermission();
+        else askPermission()
 
         var movieDatabase:MovieRoomDatabase=
                 Room.databaseBuilder(this,
@@ -68,33 +78,19 @@ class MyMoviesActivity : AppCompatActivity() {
                         .build()
         var data= mutableListOf<Movie>()
 
-//        GlobalScope.launch {
-//            // we'll get the movies and genres and then transform them into mov class for the adapter
-//            data = movieDatabase.movieDao().getAllMovies()//getting all movies from room db
-//            var dataWithGenres:MutableList<mov> = arrayListOf()
-//            data?.forEachIndexed { index, movie ->
-//                //list of Genres for current movie
-//                var curMovieGenresList=movieDatabase.genreDao().getGenres(movie.title)
-//                //list of Genres as strings for current movie
-//                var genresStrings:MutableList<String> = getGenresStrings(curMovieGenresList)
-//                //mov with genres as a list of strings
-//                var movWithGenre:mov=mov(movie.title,movie.image,movie.rating,movie.releaseYear,genresStrings)
-//                //list of movs-we add current mov to it
-//                dataWithGenres.add(index,movWithGenre)
-//                println(movie)
-//            }
-//            operateAdapter( dataWithGenres)//data
-//        }
-
         }
 
     private fun getJsonFromUrl() {
         try {
-            Timer("jsonReading", false).schedule(0,101000) {
+            Timer("jsonReading", false).schedule(0,1000) {
                 Fuel.post(URL, listOf()).responseJson { request, response, result ->
                     val currentJson:String=result.get().content
-                    val isEditTextInFocus=sharedPref.getBoolean(PREF_NAME,false)
-                    if((!currentJson.equals(formerJson)) && !isEditTextInFocus) {
+
+                    val lastScrollTime=sharedPref.getLong(PREF_NAME,0)
+                    val now= System.currentTimeMillis()
+                    val secondsSinceLastScroll: Long =(now-lastScrollTime)/1000
+
+                    if((!currentJson.equals(formerJson)) && secondsSinceLastScroll>6) {
                         formerJson = currentJson
                         toGson(currentJson)
                     }
@@ -299,7 +295,7 @@ class MyMoviesActivity : AppCompatActivity() {
         viewManager = LinearLayoutManager(this)
         viewAdapter = RecyclerAdapter(currency,this)//movies)//, paymentIds )//dataset
 
-        recyclerView = findViewById<RecyclerView>(R.id.recyclerView).apply {
+        recyclerView.apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
             setHasFixedSize(true)
@@ -313,6 +309,11 @@ class MyMoviesActivity : AppCompatActivity() {
         }
     }
 }
+
+private fun RecyclerView.OnScrollListener.onScrollStateChanged(recyclerView: RecyclerView, newState: Int, function: () -> Unit) {
+
+}
+
 data class Currency(
 
         val base: String?=null,

@@ -70,47 +70,64 @@ class RecyclerAdapter(private var myDataset: MutableList<SpecificCurrency>,conte
                 .apply(RequestOptions.circleCropTransform())
                 .into(holder.imageViewCurrency)
 
-        holder.textViewCurShort.text=myDataset[position].currencyName
-        holder.textViewCurLong.text=myDataset[position].currencyBigName
+        holder.textViewCurShort.text = myDataset[position].currencyName
+        holder.textViewCurLong.text = myDataset[position].currencyBigName
         holder.editTextCurValue.setText(myDataset[position].currencyValue.toString())
-        holder.editTextCurValue.setOnFocusChangeListener(View.OnFocusChangeListener {
-            view, b -> editTextHasFocus(b) })
+        holder.editTextCurValue.setOnFocusChangeListener(View.OnFocusChangeListener { view, b -> editTextHasFocus(b) })
 
 
-        //////////////////////////////////////////////////////////////////////////////
-            holder.itemView.setOnClickListener(View.OnClickListener { updateList(position) })
+        holder.itemView.setOnClickListener(View.OnClickListener { updateList(position) })
+        //listener for typing new value for amount of currency
+        holder.editTextCurValue.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
+            val position:Int=holder.editTextCurValue.selectionStart
+            if (event.action == KeyEvent.ACTION_UP) {
+                val currentValue = holder.editTextCurValue.text.toString()
+                if (!(currentValue == "")) {
 
-                    //listener for typing new value for amount of currency
-                    holder.editTextCurValue.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
-                        if (event.action == KeyEvent.ACTION_UP ) {
-
-                            val currentValue = holder.editTextCurValue.text.toString()
-                            if(!(currentValue=="")) {
-
-                                updateListCalculation(currentValue.toDouble(),keyCode)
-//                                val position=holder.editTextCurValue.getText().length
+                    updateListCalculation(currentValue.toDouble())//, keyCode)
+//                    val position=holder.editTextCurValue.getText().length
 //                                holder.editTextCurValue.getSelectionEnd()
-                                holder.editTextCurValue.setSelection(0)
-                                return@OnKeyListener true
-                            }else
-                                return@OnKeyListener false
-                        }
-                        else return@OnKeyListener false
-
-
-                    })
-
-        holder.editTextCurValue.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
+//                    notifyDataSetChanged()
+                    notifyItemRangeChanged(1, itemCount, null);
+                    holder.editTextCurValue.setSelection(position)
+                    return@OnKeyListener true
+                } else
+                    return@OnKeyListener false
+            } else if(event.action==KeyEvent.ACTION_DOWN){
+                return@OnKeyListener false
             }
+            else return@OnKeyListener false
 
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
 
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
         })
- }
+
+//        holder.editTextCurValue.addTextChangedListener(object : TextWatcher {
+//            override fun afterTextChanged(p0: Editable?) {
+//            }
+//
+//            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+//            }
+//
+//            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+//                val currentValue = holder.editTextCurValue.text.toString()
+//                if (!(currentValue == "")) {
+//
+//                    updateListCalculation(currentValue.toDouble())
+//                    holder.itemView.post(Runnable
+//                    { notifyDataSetChanged() }
+//                    )
+//
+//                }
+//            }
+//        })
+    }
+
+//    private fun preventRecyclerUpdate(): Boolean {
+//        val editor = sharedPref.edit()
+//        editor.putBoolean(PREF_NAME, true)
+//        editor.apply()
+//    }
+
 
     private fun editTextHasFocus(b: Boolean) {
         if(b){//in focus
@@ -137,7 +154,7 @@ class RecyclerAdapter(private var myDataset: MutableList<SpecificCurrency>,conte
     private fun getExchangeRate(currencyName: String): Double? {
         return exchangeRateList.get(currencyName)
     }
-    private fun updateListCalculation(basicValue: Double,keycode:Int) { //: Boolean//basicValue is the base currency value now
+    private fun updateListCalculation(basicValue: Double) { //: Boolean//basicValue is the base currency value now
             myDataset.forEachIndexed { index, it ->
                 //it = myDataset[index]
                 //get exchange rate of this currency against basic currency:
@@ -151,7 +168,7 @@ class RecyclerAdapter(private var myDataset: MutableList<SpecificCurrency>,conte
                     it.currencyValue = basicValue//change the first row value
                 }
             }
-            notifyDataSetChanged()
+//            notifyDataSetChanged()
 //            return true
     }
 
@@ -169,6 +186,7 @@ class RecyclerAdapter(private var myDataset: MutableList<SpecificCurrency>,conte
             updateExchangeRateList()//that's how we'll know how to calculate the exchanges
     }
 }
+
 
 
 
