@@ -20,11 +20,5 @@ class ExampleInstrumentedTest {
         val appContext = InstrumentationRegistry.getTargetContext()
         assertEquals("Tings.com.tings", appContext.packageName)
     }
-    @Test
-    fun checkCurrentDate() {
-        // Context of the app under test.
-        val pa:PurchaseActivity=PurchaseActivity()
-        val currDate = pa.getCurrentDate()
-        assertEquals("07/08/2019", currDate)
-    }
+
 }

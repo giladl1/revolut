@@ -39,7 +39,7 @@ class MyCurrenciesActivity : AppCompatActivity() {
         initializeSharedPreferences()
         currencyDetailsMap = mutableMapOf<String, CurrencyDetails>()
         getInternetPermission()
-        URL = "http://revolut.duckdns.org/latest?base=EUR"
+        URL = "https://revolut.duckdns.org/latest?base=EUR"
         getDetailsJsonFromUrl()//get data of countries
     }
 
@@ -96,7 +96,7 @@ class MyCurrenciesActivity : AppCompatActivity() {
             timer=Timer("jsonReading", false)
             //get the data every one second unless user touched the recyclerview:
             val timerTask:TimerTask=timer.schedule(0,1000) {
-                Fuel.post(URL, listOf()).responseJson { request, response, result ->
+                Fuel.get(URL, listOf()).responseJson { request, response, result ->
                     val currentJson:String=result.get().content
                     val lastScrollTime=sharedPref.getLong(PREF_NAME,0)
                     val now= System.currentTimeMillis()
@@ -122,7 +122,7 @@ class MyCurrenciesActivity : AppCompatActivity() {
     private fun getDetailsJsonFromUrl() {
         try {
 
-            val DETAILSURL:String="https://restcountries.eu/rest/v2/all?fields=flag;currencies;alpha2Code"//http://www.geognos.com/api/en/countries/info/all.json"//http://restcountries.eu/rest/v2/alpha/col"//https://restcountries.eu/rest/v2/all"//?fields=flag;currencies
+            val DETAILSURL:String="https://restcountries.eu/rest/v2/all?fields=flag;currencies;alpha2Code"
             Fuel.get(DETAILSURL, listOf()).responseJson { request, response, result ->
                 toGsonDetails(result.get().content)
             }
